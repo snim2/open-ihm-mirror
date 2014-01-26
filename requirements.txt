@@ -8,5 +8,5 @@ gunicorn==18.0
 hg-git==0.5.0
 itsdangerous==0.23
 mercurial==2.8.2
-python-hglib==unknown
+python-hglib==1.0
 wsgiref==0.1.2
