@@ -1,4 +1,6 @@
-import datetime
+"""
+Mirror a Mercurial repository to GitHub.
+"""
 import hglib
 import os.path
 import settings
@@ -21,26 +23,30 @@ hgext.bookmarks =
 hggit = 
 """
 
-@app.route('/', methods = ['GET', 'POST'] )
+@app.route('/', methods=['GET', 'POST'])
 def mirror():
+    """Mirror a Mercurial repository on GITHUB.
+    If called via an HTTP GET show a list of recent commits (for debugging
+    purposes).
+    """
     if request.method == 'POST':
-        if not (os.path.exists(app.config.get('REPO_PATH')) and 
+        if not (os.path.exists(app.config.get('REPO_PATH')) and
                 os.path.isdir(app.config.get('REPO_PATH'))):
-            hglib.clone(source=app.config.get('GCODE_URL'), 
+            hglib.clone(source=app.config.get('GCODE_URL'),
                         dest=app.config.get('REPO_PATH'))
         # Add hg-git extension to Mercurial.
-        with open(app.config.get('REPO_PATH') + '/.hg/hgrc', 'r') as f:
-            config = f.read()
+        with open(app.config.get('REPO_PATH') + '/.hg/hgrc', 'r') as fname:
+            config = fname.read()
             if not 'hggit' in config:
-                with open(app.config.get('REPO_PATH') + '/.hg/hgrc', 'a') as fa:
-                    fa.write(_hgrc)
+                with open(app.config.get('REPO_PATH') + '/.hg/hgrc', 'a') as fnm:
+                    fnm.write(_hgrc)
         repo = hglib.open(app.config.get('REPO_PATH'))
         repo.pull(source=app.config.get('GCODE_URL'))
         repo.update(clean=True)
         repo.push(dest=app.config.get('GITHUB_URL'))
         return ''
     elif (request.method == 'GET' and
-          (os.path.exists(app.config.get('REPO_PATH')) and 
+          (os.path.exists(app.config.get('REPO_PATH')) and
            os.path.isdir(app.config.get('REPO_PATH')))):
         repo = hglib.open(app.config.get('REPO_PATH'))
         log = repo.log(limit=10)
