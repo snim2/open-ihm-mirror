@@ -3,6 +3,7 @@ Mirror a Mercurial repository to GitHub.
 """
 import hglib
 import os.path
+import cgi
 import settings
 
 from flask import Flask, request
@@ -15,7 +16,8 @@ def _log2html(log):
     """Convert a single revision (type hglib.client.revision) to HTML.
     """
     template = '<dt><strong>{0}</strong></dt><dd>{1} <br/><em>-- {2}</em></dd>'
-    return template.format(log.date, log.desc, log.author)
+    items = [cgi.escape(str(x)) for x in log.date, log.desc, log.author]
+    return template.format(*items)
 
 _hgrc = """
 [extensions]
@@ -54,7 +56,7 @@ def mirror():
         html = '\n'.join(html_log)
         return ('<html><head></head><body><h1>Recent open-ihm revisions</h1>'
                 + '<dl>' + html + '</dl>' + '<h1>Config</h1> <p>'
-                + str(repo.config(showsource=True)) + '</p>'
+                + cgi.escape(str(repo.config(showsource=True))) + '</p>'
                 + '</body></html>')
     elif request.method == 'GET':
         return ('<html><head></head><body><h1>open-ihm mirror (empty)</h1>'
